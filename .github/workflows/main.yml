@@ -30,8 +30,8 @@ jobs:
           mkdir -p project
           unzip -q "$ZIP" -d project
 
-          echo "Files extracted:"
-          find project -maxdepth 3 -type f | head -80
+          echo "Extracted project files:"
+          find project -maxdepth 4 -type f | head -100
 
       - name: Locate Gradle project
         id: locate
@@ -55,19 +55,17 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
       - name: Build debug APK
         working-directory: ${{ steps.locate.outputs.dir }}
-        run: |
-          if [ -f gradlew ]; then
-            chmod +x gradlew
-            ./gradlew assembleDebug
-          else
-            echo "ERROR: Gradle wrapper gradlew is missing."
-            exit 1
-          fi
+        run: gradle assembleDebug
 
       - name: Upload APK
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Barq-Android-APK
